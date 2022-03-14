@@ -153,5 +153,40 @@ module.exports = {
         } catch (error) {
             return false
         }
+    },
+    newReview: async (parent, args, { models, user }) => {
+        if(!user){
+            throw new AuthenticationError('You must be logged in')
+        }
+        active = await models.User.findById(user.id)
+        reviewedMovie = await models.Movie.findById(args.movieId)
+
+        if(active && active.role !== "USER"){
+            throw new ForbiddenError('Only users can leave reviews')
+        }
+        console.log(reviewedMovie)
+        return await models.Review.create({
+            content: args.content,
+            stars: args.stars,
+            author: mongoose.Types.ObjectId(active.id),
+            reviewOf: mongoose.Types.ObjectId(reviewedMovie.id)
+        })
+    },
+    deleteReview: async (parent, args, { models, user }) => {
+        if(!user) {
+            throw new AuthenticationError('You must be logged in')
+        }
+        active = await models.User.findById(user.id)
+        const reviewToBeDeleted = await models.Review.findById(args.id)
+
+        if ((reviewToBeDeleted && String(reviewToBeDeleted.author._id) !== active.id) && active.role !== 'ADMIN'){
+            throw new ForbiddenError('You do not have the right!')
+        }
+        try {
+            reviewToBeDeleted.remove()
+            return true
+        } catch (error) {
+            return false
+        }
     }
 }

@@ -14,6 +14,9 @@ module.exports = {
     movies: async (_, args, { models } ) => {
         return await models.Movie.find()
     },
+    movie: async (parent, args, { models }) => {
+        return await models.Movie.findById( args.id )
+    },
     MovieFeed: async(parent, args, { models }) => {
         const limit = 10
         let hasMoreMovies = false
@@ -36,5 +39,35 @@ module.exports = {
             mCursor: newmCursor,
             hasMoreMovies
         }
+    },
+    //reviews
+    ReviewFeed: async(parent, args, { models }) => {
+        const limit = 10
+        const hasMoreReviews = false
+        let cursorQuery = {}
+        if (args.rCursor){
+            cursorQuery = { _id: { $lt: args.rCursor }}
+        }
+        let reviews = await models.Review.find(cursorQuery)
+            .sort({ id: -1 })
+            .limit(limit + 1)
+
+        if(reviews.length > limit){
+            hasMoreReviews = true
+            reviews = reviews.slice(0, -1)
+        }
+        const newrCursor = reviews[reviews.length - 1]._id
+
+        return {
+            reviews,
+            newrCursor,
+            hasMoreReviews
+        }
+    },
+    reviews: async(_, args, { models }) => {
+        return await models.Review.find()
+    },
+    review: async(parent, args, { models }) => {
+        return await models.Review.findById( args.id )
     }
 }
