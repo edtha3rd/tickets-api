@@ -6,6 +6,7 @@ const {
         ForbiddenError        
 } = require('apollo-server-express')
 const { MongoCredentials } = require('mongoose/node_modules/mongodb')
+const movie = require('./movie')
 require('dotenv').config()
 
 module.exports = {
@@ -16,7 +17,6 @@ module.exports = {
             throw new AuthenticationError('You must be a user')
         }
         active = await models.User.findById(user.id)
-        console.log(active)
         if(active && active.role !== 'ADMIN') {
             throw new ForbiddenError('You do not have permission')
         }
@@ -25,6 +25,86 @@ module.exports = {
             year: args.year,
             submittedBy: mongoose.Types.ObjectId(active.id)
         })
+    },
+    deleteMovie: async(parent, args, { models, user }) => {
+        if(!user){
+            throw new AuthenticationError('You must be a user')
+        }
+        active = await models.User.findById(user.id)
+        const movieToBeDeleted = await models.Movie.findById(args.id)
+
+        if(movieToBeDeleted && String(movieToBeDeleted.submittedBy) !== active.id){
+            throw new ForbiddenError('You do not have the rights')
+        }
+        try {
+            await movieToBeDeleted.remove()
+            return true
+        } catch (error) {
+            return false
+        }
+    },
+    editMovie: async(parent, args, { models, user }) => {
+        if(!user){
+            throw new AuthenticationError('You must be signed in')
+        }
+        const movie = await models.Movie.findById(args.id)
+        active = await models.User.findById(user.id)
+        if(movie && String(movie.submittedBy) !== active.id){
+            throw new ForbiddenError('You do no have the right!')
+        }
+        return await models.Movie.findOneAndUpdate(
+            {
+                _id: args.id,
+            },
+            {
+                $set: {
+                    title: args.title,
+                    year: args.year
+                }
+            },
+            {
+                new: true
+            }
+        )
+    },
+    toggleCatalogue: async(parent, args, { models, user }) => {
+        if (!user){
+            throw new AuthenticationError('Please log in')
+        }
+        active = await models.User.findById(user.id)
+        let movieCheck = await models.Movie.findById(args.id)
+        const hasTheater = movieCheck.showingAt.indexOf(active.id)
+
+        if (active.role !== "THEATER"){
+            throw new ForbiddenError('Only a theater can perform this action')
+        }
+        if (hasTheater >= 0){
+            return await models.Movie.findByIdAndUpdate(args.id,
+                { //movie is already in catalog
+                    $pull: {
+                        showingAt: mongoose.Types.ObjectId(active.id)
+                    },
+                    $inc: {
+                        showingAtCount: -1
+                    }
+                }, {
+                    new: true
+                }
+            )
+        } else { //movie is not already in catalog
+            return await models.Movie.findByIdAndUpdate(args.id,
+                {
+                    $push: {
+                        showingAt: mongoose.Types.ObjectId(active.id)
+                    },
+                    $inc: {
+                        showingAtCount: 1
+                    }
+                }, {
+                    new: true
+                }
+            )
+        }
     },
 
     //user mutations

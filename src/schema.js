@@ -8,12 +8,15 @@ module.exports = gql`
         password: String!
         role: String!
         submissions: [Movie]
+        catalogue: [Movie!]!
     }
     type Movie {
         id: ID!
         title: String!
         year: String!
         submittedBy: User!
+        showingAt: [User!]
+        showingAtCount: Int!
     }
     type Query {
         #user queries
@@ -21,10 +24,10 @@ module.exports = gql`
         users: [User]
         currentUser: User!
 
-
         #movie queries
         movie(id: ID!): Movie!
         movies: [Movie]
+        MovieFeed(mCursor: String!): MovieFeed
     }
     type Mutation {
         #user mutations
@@ -32,8 +35,17 @@ module.exports = gql`
         signIn(email: String!, password: String!): String!
         deleteUser(id: ID): Boolean!
 
+        #theater mutations
+        toggleCatalogue(id: ID!): Movie!
+
         #movie mutations
         newMovie(title: String!, year: String!): Movie!
         deleteMovie(id: ID): Boolean!
+        editMovie(id:ID!, title: String, year: String): Movie!
+    }
+    type MovieFeed {
+        movies: [Movie]!
+        mCursor: String!
+        hasMoreMovies: Boolean!
     }
 `

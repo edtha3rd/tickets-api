@@ -13,6 +13,14 @@ const movieSchema = Schema({
     submittedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    showingAt: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    showingAtCount: {
+        type: Number,
+        default: 0
     }
 })
 

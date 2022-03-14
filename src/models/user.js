@@ -27,10 +27,14 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    submissions: {
+    /*submissions: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Movie'
-    }
+    },
+    catalogue: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Movie'
+    } */
 })
 
 const User = mongoose.model('User', userSchema)
