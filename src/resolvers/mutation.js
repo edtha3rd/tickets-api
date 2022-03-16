@@ -5,8 +5,6 @@ const {
         AuthenticationError,
         ForbiddenError        
 } = require('apollo-server-express')
-const { MongoCredentials } = require('mongoose/node_modules/mongodb')
-const movie = require('./movie')
 require('dotenv').config()
 
 module.exports = {
@@ -188,5 +186,43 @@ module.exports = {
         } catch (error) {
             return false
         }
+    },
+    deleteOrder: async (parent, args, { models, user }) => {
+        if(!user) {
+            throw new AuthenticationError('You must be logged in')
+        }
+        active = await models.User.findById(user.id)
+        const orderToBeDeleted = await models.Order.findById(args.id)
+
+        //if((orderToBeDeleted))
+        try {
+            orderToBeDeleted.remove()
+            return true
+        } catch (error) {
+            return false
+        }
+    },
+    newOrder: async(parent, args, { models, user }) => {
+        if(!user){
+            throw new AuthenticationError('You must be logged in')
+        }
+        active = await models.User.findById(user.id)
+        movie = await models.Movie.findById(args.movieId)
+        atCinema = await models.User.findById(args.locationId)
+        //console.log(args.locationId, args.movieId)
+        //locationCheck = await models.Movie.find({ "$where": "movie.showingAt == atCinema" }, { "id": args.locationId })
+        //console.log(locationCheck)
+        if (active && active.role !== "USER"){
+            throw new ForbiddenError('Only a user can order a ticket')
+        }
+        console.log(active.id, "active \n", args.locationId, "location \n", args.movieId, "movie \n")
+        return await models.Order.create({
+            orderedBy: mongoose.Types.ObjectId(active.id),
+            location: mongoose.Types.ObjectId(args.locationId),
+            toWatch: mongoose.Types.ObjectId(args.movieId),
+            screeningTime: args.screeningTime,
+            screeningDay: args.screeningDay,
+            quality: args.quality
+        })
     }
 }

@@ -43,7 +43,7 @@ module.exports = {
     //reviews
     ReviewFeed: async(parent, args, { models }) => {
         const limit = 10
-        const hasMoreReviews = false
+        let hasMoreReviews = false
         let cursorQuery = {}
         if (args.rCursor){
             cursorQuery = { _id: { $lt: args.rCursor }}
@@ -69,5 +69,11 @@ module.exports = {
     },
     review: async(parent, args, { models }) => {
         return await models.Review.findById( args.id )
+    },
+    orders: async(_, args, { models }) => {
+        return await models.Order.find()
+    },
+    order: async(parent, args, { models }) => {
+        return await models.Order.findById(args.id)
     }
 }

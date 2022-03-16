@@ -8,5 +8,9 @@ module.exports = {
     //a movie has many reviews
     reviews: async(movie, args, { models }) => {
         return await models.Review.find({ reviewOf: movie._id })
+    },
+    //a movie has many ordered tickets
+    orderedTickets: async(movie, args, { models }) => {
+        return await models.Order.find({ toWatch: movie._id })
     }
 }
