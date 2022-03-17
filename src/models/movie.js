@@ -10,6 +10,9 @@ const movieSchema = Schema({
         type: String,
         required: true
     },
+    poster: {
+        type: String
+    },
     submittedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

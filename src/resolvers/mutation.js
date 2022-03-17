@@ -6,6 +6,8 @@ const {
         ForbiddenError        
 } = require('apollo-server-express')
 require('dotenv').config()
+const cloudinary = require('cloudinary')
+
 
 module.exports = {
     //movies
@@ -18,9 +20,25 @@ module.exports = {
         if(active && active.role !== 'ADMIN') {
             throw new ForbiddenError('You do not have permission')
         }
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        })
+        try {
+            result = await cloudinary.v2.uploader.upload(args.poster, {
+                allowed_formats: ["jpg","jpeg","png"],
+                public_id: `posters/${args.title}`,
+                folder: "tickets",
+            })
+        } catch (error) {
+            return `Image could not be uploaded because:${error.message}`
+        }
+        
         return await models.Movie.create({
             title: args.title,
             year: args.year,
+            poster: result.url,
             submittedBy: mongoose.Types.ObjectId(active.id)
         })
     },
@@ -50,6 +68,20 @@ module.exports = {
         if(movie && String(movie.submittedBy) !== active.id){
             throw new ForbiddenError('You do no have the right!')
         }
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        })
+        try {
+            result = await cloudinary.v2.uploader.upload(args.poster, {
+                allowed_formats: ["jpg","png","jpeg"],
+                public_id: `posters/${movie.title}`,
+                folder: "tickets",
+            })
+        } catch (e) {
+            return `Image could not be uploaded:${e.message}`
+        }
         return await models.Movie.findOneAndUpdate(
             {
                 _id: args.id,
@@ -57,7 +89,8 @@ module.exports = {
             {
                 $set: {
                     title: args.title,
-                    year: args.year
+                    year: args.year,
+                    poster: result.url
                 }
             },
             {

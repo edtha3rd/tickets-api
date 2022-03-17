@@ -21,6 +21,7 @@ module.exports = gql`
         id: ID!
         title: String!
         year: String!
+        poster: String
         submittedBy: User!
         showingAt: [User!]
         showingAtCount: Int!
@@ -86,9 +87,9 @@ module.exports = gql`
         toggleCatalogue(id: ID!): Movie!
 
         #movie mutations
-        newMovie(title: String!, year: String!): Movie!
+        newMovie(title: String!, year: String!, poster: String): Movie!
         deleteMovie(id: ID): Boolean!
-        editMovie(id:ID!, title: String, year: String): Movie!
+        editMovie(id:ID!, title: String, year: String, poster: String): Movie!
     }
     type MovieFeed {
         movies: [Movie]!
