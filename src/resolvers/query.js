@@ -1,3 +1,5 @@
+const { ForbiddenError } = require('apollo-server-express')
+
 module.exports = {
   //users
   users: async (_, args, { models }) => {
@@ -35,6 +37,9 @@ module.exports = {
     const theater = await models.User.findById(args.theaterId)
     return await models.Movie.find({ showingAt: theater._id })
   },
+  submissions: async (parent, args, { models, user }) => {
+    return await models.Movie.find({ submittedBy: user.id })
+  },
   MovieFeed: async (parent, args, { models }) => {
     const limit = 10
     let hasMoreMovies = false
@@ -58,6 +63,11 @@ module.exports = {
       hasMoreMovies,
     }
   },
+  //reservations
+  reservations: async (_, args, { models }) => {
+    return await models.Reservation.find()
+  },
+
   //reviews
   ReviewFeed: async (parent, args, { models }) => {
     const limit = 10
@@ -88,10 +98,32 @@ module.exports = {
   review: async (parent, args, { models }) => {
     return await models.Review.findById(args.id)
   },
+  //orders
   orders: async (_, args, { models }) => {
     return await models.Order.find()
   },
   order: async (parent, args, { models }) => {
     return await models.Order.findById(args.id)
+  },
+  myOrders: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new ForbiddenError('You must be logged in')
+    }
+    return await models.Order.find({ orderedBy: user.id }).sort({ _id: -1 })
+  },
+  //sessions
+  session: async (parent, args, { models }) => {
+    const session = await models.Session.find({
+      movieId: args.movieId,
+      location: args.locationId,
+      quality: args.quality,
+      screeningDay: args.screeningDay,
+      screeningTime: args.screeningTime,
+    })
+    if (!session) throw new ValidationError('this session does not exist')
+    else return session
+  },
+  sessions: async (parent, args, { models }) => {
+    return await models.Session.find()
   },
 }

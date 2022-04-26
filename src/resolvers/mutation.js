@@ -4,11 +4,15 @@ const jwt = require('jsonwebtoken')
 const { AuthenticationError, ForbiddenError } = require('apollo-server-express')
 require('dotenv').config()
 const cloudinary = require('cloudinary')
+const sK = process.env.SECRET_KEY
+const Stripe = require('stripe')
+
+const stripe = Stripe(sK, { apiVersion: '2020-08-27' })
 
 module.exports = {
   //movies
   newMovie: async (parent, args, { models, user }) => {
-    console.log(user)
+    // console.log(user)
     if (!user) {
       throw new AuthenticationError('You must be a user')
     }
@@ -62,8 +66,9 @@ module.exports = {
     if (!user) {
       throw new AuthenticationError('You must be signed in')
     }
-    const movie = await models.Movie.findById(args.id)
-    active = await models.User.findById(user.id)
+    const movie = await models.Movie.findById(args.movieId)
+    const active = await models.User.findById(user.id)
+
     if (movie && String(movie.submittedBy) !== active.id) {
       throw new ForbiddenError('You do no have the right!')
     }
@@ -81,15 +86,16 @@ module.exports = {
     } catch (e) {
       return `Image could not be uploaded:${e.message}`
     }
+
     return await models.Movie.findOneAndUpdate(
       {
-        _id: args.id,
+        _id: args.movieId,
       },
       {
         $set: {
           title: args.title,
           year: args.year,
-          poster: result.url,
+          // poster: result.url,
         },
       },
       {
@@ -158,7 +164,7 @@ module.exports = {
       })
       return jwt.sign({ id: user._id }, process.env.JWT_SECRET)
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       throw new Error('Error creating account')
     }
   },
@@ -190,6 +196,23 @@ module.exports = {
       return false
     }
   },
+  //payment intent
+  retrievePaymentIntent: async (parent, args, { models }) => {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: args.totalPrice * 100,
+        currency: 'cny',
+        payment_method_types: ['card'],
+      })
+
+      const clientSecret = paymentIntent.client_secret
+
+      return clientSecret
+    } catch (e) {
+      console.log(e.message)
+    }
+  },
+  //review
   newReview: async (parent, args, { models, user }) => {
     if (!user) {
       throw new AuthenticationError('You must be logged in')
@@ -200,7 +223,7 @@ module.exports = {
     if (active && active.role !== 'USER') {
       throw new ForbiddenError('Only users can leave reviews')
     }
-    console.log(reviewedMovie)
+    // console.log(reviewedMovie)
     return await models.Review.create({
       content: args.content,
       stars: args.stars,
@@ -251,9 +274,6 @@ module.exports = {
     active = await models.User.findById(user.id)
     movie = await models.Movie.findById(args.movieId)
     atCinema = await models.User.findById(args.locationId)
-    //console.log(args.locationId, args.movieId)
-    //locationCheck = await models.Movie.find({ "$where": "movie.showingAt == atCinema" }, { "id": args.locationId })
-    //console.log(locationCheck)
     if (active && active.role !== 'USER') {
       throw new ForbiddenError('Only a user can order a ticket')
     }
@@ -265,5 +285,119 @@ module.exports = {
       screeningDay: args.screeningDay,
       quality: args.quality,
     })
+  },
+  newReservation: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    active = await models.User.findById(user.id)
+    return await models.Reservation.create({
+      reservedBy: mongoose.Types.ObjectId(active.id),
+      sessionDetails: mongoose.Types.ObjectId(args.sessionId),
+      seat: args.seatSelected,
+      totalPrice: args.totalPrice,
+    })
+  },
+  deleteReservation: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    const reservationToBeDeleted = await models.Reservation.findById(args.id)
+
+    //if((orderToBeDeleted))
+    try {
+      reservationToBeDeleted.remove()
+      return true
+    } catch (error) {
+      return false
+    }
+  },
+  deleteAllReservations: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    // const reservationsToBeDeleted = await models.Reservation.find()
+    try {
+      await models.Reservation.deleteMany()
+      return true
+    } catch (error) {
+      console.log(error.message)
+      return false
+    }
+  },
+  retrieveSession: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    // active = await models.User.findById(user.id)
+    // console.log(args)
+    // movie = await models.Movie.findById(args.movieId)
+    // atCinema = await models.User.findById(args.locationId)
+    let session = await models.Session.findOne({
+      movie: mongoose.Types.ObjectId(args.movieId),
+      location: mongoose.Types.ObjectId(args.locationId),
+      quality: args.quality,
+      screeningDay: args.screeningDay,
+      screeningTime: args.screeningTime,
+    })
+    // console.log(session)
+    if (!session) {
+      // console.log('not session')
+      return await models.Session.create({
+        location: mongoose.Types.ObjectId(args.locationId),
+        movie: mongoose.Types.ObjectId(args.movieId),
+        screeningTime: args.screeningTime,
+        screeningDay: args.screeningDay,
+        quality: args.quality,
+        seatMap: [
+          ['1', '2', '3', '4', '5'],
+          ['6', '7', '8', '9', '10'],
+          ['11', '12', '13', '14', '15'],
+          ['16', '17', '18', '19', '20'],
+          ['21', '22', '23', '24', '25'],
+        ],
+      })
+    } else {
+      // console.log('session')
+      return await session
+    }
+  },
+  updateSession: async (parent, args, { models, user }) => {
+    console.log('updating')
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    // const reservation = models.Reservation.findById(args.reservationId)
+    return await models.Session.findOneAndUpdate(
+      {
+        _id: args.sessionId,
+      },
+      {
+        $set: {
+          seatsAvailable: args.seatsAvailable,
+        },
+        $push: {
+          selectedSeats: args.selectedSeats,
+        },
+      },
+      {
+        new: true,
+      }
+    )
+  },
+  deleteSession: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be logged in')
+    }
+    active = await models.User.findById(user.id)
+    const sessionToBeDeleted = await models.Session.findById(args.id)
+
+    //if((orderToBeDeleted))
+    try {
+      sessionToBeDeleted.remove()
+      return true
+    } catch (error) {
+      return false
+    }
   },
 }

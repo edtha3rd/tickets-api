@@ -3,31 +3,52 @@ const { Schema } = mongoose
 const { isEmail } = require('validator')
 
 const userSchema = new Schema({
-    username: {
-        type: String,
-        index: {
-            unique: true
-        }
+  address: {
+    type: String,
+  },
+  username: {
+    type: String,
+    index: {
+      unique: true,
     },
-    email: {
-        type: String,
-        index: {
-            unique: true
-        },
-        required: true,
-        validate: [isEmail, 'invalid email']
+  },
+  fullName: {
+    type: String,
+    required: false,
+  },
+  email: {
+    type: String,
+    index: {
+      unique: true,
     },
-    role: {
-        type: String,
-        required: false,
-        default: "USER",
-        enum: ["USER", "ADMIN", "THEATER"]
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    /*submissions: {
+    required: true,
+    validate: [isEmail, 'invalid email'],
+  },
+  role: {
+    type: String,
+    required: false,
+    default: 'USER',
+    enum: ['USER', 'ADMIN', 'THEATER'],
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  seats: {
+    type: [[Number]],
+    default: [
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+    ],
+  },
+  seatsAvailable: {
+    type: Number,
+    default: 50,
+  },
+  /*submissions: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Movie'
     },

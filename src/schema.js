@@ -12,11 +12,16 @@ module.exports = gql`
     #ADMIN
     submissions: [Movie]
     #THEATER
+    fullName: String
+    address: String
     catalogue: [Movie!]!
     myOrders: [Order!]!
+    seats: [[Int]]
+    seatsAvailable: Int
     #USER
     reviewsPosted: [Review!]!
     ordersMade: [Order!]!
+    reservationsMade: [Reservation]
   }
   type Movie {
     id: ID!
@@ -29,12 +34,44 @@ module.exports = gql`
     reviews: [Review!]!
     orderedTickets: [Order!]!
   }
+  type PaymentIntent {
+    amount: Int
+    currency: String
+    payment_method_types: [String]
+  }
   type Review {
     id: ID!
     content: String
     stars: Int!
     author: User!
     reviewOf: Movie!
+  }
+  type Reservation {
+    createdAt: DateTime
+    id: ID!
+    reservedBy: User!
+    seat: [String]
+    sessionDetails: Session!
+    totalPrice: Int
+    confirmationCode: String
+  }
+  type Seat {
+    id: ID!
+    seatRow: String
+    seatColumn: Int
+    selected: Boolean
+  }
+  type Session {
+    id: ID!
+    location: User!
+    movie: Movie!
+    reservations: Reservation
+    screeningDay: Date!
+    screeningTime: String!
+    quality: String!
+    seatsAvailable: Int
+    seatMap: [[String]]
+    selectedSeats: [String]
   }
   type Order {
     id: ID!
@@ -65,6 +102,7 @@ module.exports = gql`
     movie(id: ID!): Movie!
     movies: [Movie]
     MovieFeed(mCursor: String): MovieFeed
+    submissions: [Movie]
     locations(movieId: ID!): [User]
     catalog(theaterId: ID!): [Movie]
 
@@ -72,13 +110,29 @@ module.exports = gql`
     review(id: ID!): Review
     reviews: [Review]
 
+    #reservations
+    reservations: [Reservation]
+
     #order queries
     order(id: ID!): Order
     orders: [Order]
+    myOrders: [Order]
+
+    #session query
+    session(
+      movieId: ID!
+      locationId: ID!
+      quality: String!
+      screeningTime: String!
+      screeningDay: Date!
+    ): Session
+    sessions: [Session]
   }
   type Mutation {
     #user mutations
     signUp(
+      fullName: String
+      address: String
       username: String!
       email: String!
       password: String!
@@ -86,6 +140,9 @@ module.exports = gql`
     ): String!
     signIn(email: String!, password: String!): String!
     deleteUser(id: ID): Boolean!
+    #payment intent
+    retrievePaymentIntent(totalPrice: Int!): String!
+    #review
     newReview(movieId: ID!, content: String, stars: Int!): Review!
     deleteReview(id: ID!): Boolean!
     newOrder(
@@ -96,13 +153,29 @@ module.exports = gql`
       quality: String!
     ): Order
     deleteOrder(id: ID!): Boolean!
-    newTicket(
-      orderId: ID!
-      seatRow: [String!]
-      seatColumn: [Int!]
-      quantity: Int!
-      totalCost: Int!
-    ): Ticket
+    #reservation
+    newReservation(
+      sessionId: ID!
+      seatSelected: [String]
+      totalPrice: Int!
+    ): Reservation
+    deleteReservation(id: ID!): Boolean
+    deleteAllReservations: Boolean
+    #session
+    retrieveSession(
+      movieId: ID!
+      quality: String!
+      screeningDay: Date!
+      screeningTime: String!
+      locationId: ID!
+    ): Session
+    updateSession(
+      sessionId: ID!
+      seatMap: [[String]]
+      seatsAvailable: Int
+      selectedSeats: [String]
+    ): Session
+    deleteSession(id: ID!): Boolean
 
     #theater mutations
     toggleCatalogue(id: ID!): Movie!
@@ -110,7 +183,7 @@ module.exports = gql`
     #movie mutations
     newMovie(title: String!, year: String!, poster: String): Movie!
     deleteMovie(id: ID): Boolean!
-    editMovie(id: ID!, title: String, year: String, poster: String): Movie!
+    editMovie(movieId: ID!, title: String, year: String, poster: String): Movie!
   }
   type MovieFeed {
     movies: [Movie]!

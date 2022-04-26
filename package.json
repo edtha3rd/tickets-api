@@ -25,6 +25,7 @@
     "mongodb": "^4.4.1",
     "mongoose": "^6.2.6",
     "nodemon": "^2.0.15",
+    "stripe": "^8.217.0",
     "validator": "^13.7.0"
   }
 }

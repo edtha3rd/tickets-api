@@ -2,47 +2,53 @@ const mongoose = require('mongoose')
 const { User } = require('.')
 const { Schema } = mongoose
 
-const orderSchema = Schema(
+const sessionSchema = Schema(
   {
     location: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    toWatch: {
+    movie: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Movie',
       required: true,
     },
-    orderedBy: {
+    reservations: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Reservation',
+    },
+    screeningDay: {
+      type: Date,
       required: true,
     },
     screeningTime: {
       type: String,
-      enum: ['14:15', '16:30', '18:00', '19:30'],
       required: true,
-    },
-    screeningDay: {
-      type: Date,
-      min: Date.now() - 1000 * 3600 * 23,
-      max: Date.now() + 1000 * 3600 * 24 * 7,
     },
     quality: {
       type: String,
-      enum: ['2D', 'IMAX 2D', 'IMAX 3D'],
       required: true,
+    },
+    seatsAvailable: {
+      type: Number,
+      default: 25,
+    },
+    seatMap: {
+      type: [[String]],
+    },
+    selectedSeats: {
+      type: [String],
     },
   },
   {
-    timestamps: true,
+    timestamp: true,
     index: {
-      expiresAfterSeconds: 3600 * 24 * 7,
+      expiresAfterSeconds: 3600 * 24 * 14,
     },
   }
 )
 
-const Order = mongoose.model('Order', orderSchema)
+const Session = mongoose.model('Session', sessionSchema)
 
-module.exports = Order
+module.exports = Session
