@@ -55,12 +55,6 @@ module.exports = gql`
     totalPrice: Int
     confirmationCode: String
   }
-  type Seat {
-    id: ID!
-    seatRow: String
-    seatColumn: Int
-    selected: Boolean
-  }
   type Session {
     id: ID!
     location: User!
@@ -81,14 +75,6 @@ module.exports = gql`
     screeningTime: String!
     screeningDay: Date!
     quality: String!
-  }
-  type Ticket {
-    id: ID!
-    details: Order!
-    seatRow: [String!]!
-    seatColumn: [Int!]!
-    quantity: Int!
-    totalCost: Int!
   }
   type Query {
     #user queries
