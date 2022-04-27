@@ -14,6 +14,7 @@ module.exports = gql`
     #THEATER
     fullName: String
     address: String
+    phoneNumber: String
     catalogue: [Movie!]!
     myOrders: [Order!]!
     seats: [[Int]]
@@ -28,6 +29,7 @@ module.exports = gql`
     title: String!
     year: String!
     poster: String
+    synopsis: String
     submittedBy: User!
     showingAt: [User!]
     showingAtCount: Int!
@@ -119,6 +121,7 @@ module.exports = gql`
     signUp(
       fullName: String
       address: String
+      phoneNumber: String
       username: String!
       email: String!
       password: String!
@@ -126,6 +129,7 @@ module.exports = gql`
     ): String!
     signIn(email: String!, password: String!): String!
     deleteUser(id: ID): Boolean!
+    updateUser(fullName: String, address: String, phoneNumber: String): User!
     #payment intent
     retrievePaymentIntent(totalPrice: Int!): String!
     #review
@@ -167,7 +171,12 @@ module.exports = gql`
     toggleCatalogue(id: ID!): Movie!
 
     #movie mutations
-    newMovie(title: String!, year: String!, poster: String): Movie!
+    newMovie(
+      title: String!
+      year: String!
+      poster: String
+      synopsis: String
+    ): Movie!
     deleteMovie(id: ID): Boolean!
     editMovie(movieId: ID!, title: String, year: String, poster: String): Movie!
   }

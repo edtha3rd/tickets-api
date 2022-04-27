@@ -20,25 +20,25 @@ module.exports = {
     if (active && active.role !== 'ADMIN') {
       throw new ForbiddenError('You do not have permission')
     }
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    })
-    try {
-      result = await cloudinary.v2.uploader.upload(args.poster, {
-        allowed_formats: ['jpg', 'jpeg', 'png'],
-        public_id: `posters/${args.title}`,
-        folder: 'tickets',
-      })
-    } catch (error) {
-      return `Image could not be uploaded because:${error.message}`
-    }
+    // cloudinary.config({
+    //   cloud_name: process.env.CLOUDINARY_NAME,
+    //   api_key: process.env.CLOUDINARY_API_KEY,
+    //   api_secret: process.env.CLOUDINARY_API_SECRET,
+    // })
+    // try {
+    //   result = await cloudinary.v2.uploader.upload(args.poster, {
+    //     allowed_formats: ['jpg', 'jpeg', 'png'],
+    //     public_id: `posters/${args.title}`,
+    //     folder: 'tickets',
+    //   })
+    // } catch (error) {
+    //   return `Image could not be uploaded because:${error.message}`
+    // }
 
     return await models.Movie.create({
       title: args.title,
       year: args.year,
-      poster: result.url,
+      poster: args.poster,
       submittedBy: mongoose.Types.ObjectId(active.id),
     })
   },
@@ -159,6 +159,9 @@ module.exports = {
       const user = await models.User.create({
         username: args.username,
         email,
+        fullName: args.fullName,
+        address: args.address,
+        mobileNumber: args.mobileNumber,
         role: args.role,
         password: hashed,
       })
@@ -195,6 +198,24 @@ module.exports = {
     } catch (error) {
       return false
     }
+  },
+  updateUser: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be signed in')
+    }
+
+    return await models.User.findByIdAndUpdate(
+      {
+        _id: user.id,
+      },
+      {
+        $set: {
+          fullName: args.fullName,
+          address: args.address,
+          phoneNumber: args.phoneNumber,
+        },
+      }
+    )
   },
   //payment intent
   retrievePaymentIntent: async (parent, args, { models }) => {
