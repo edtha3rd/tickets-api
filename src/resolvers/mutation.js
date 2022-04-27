@@ -12,7 +12,6 @@ const stripe = Stripe(sK, { apiVersion: '2020-08-27' })
 module.exports = {
   //movies
   newMovie: async (parent, args, { models, user }) => {
-    // console.log(user)
     if (!user) {
       throw new AuthenticationError('You must be a user')
     }
@@ -20,20 +19,6 @@ module.exports = {
     if (active && active.role !== 'ADMIN') {
       throw new ForbiddenError('You do not have permission')
     }
-    // cloudinary.config({
-    //   cloud_name: process.env.CLOUDINARY_NAME,
-    //   api_key: process.env.CLOUDINARY_API_KEY,
-    //   api_secret: process.env.CLOUDINARY_API_SECRET,
-    // })
-    // try {
-    //   result = await cloudinary.v2.uploader.upload(args.poster, {
-    //     allowed_formats: ['jpg', 'jpeg', 'png'],
-    //     public_id: `posters/${args.title}`,
-    //     folder: 'tickets',
-    //   })
-    // } catch (error) {
-    //   return `Image could not be uploaded because:${error.message}`
-    // }
 
     return await models.Movie.create({
       title: args.title,
@@ -72,20 +57,20 @@ module.exports = {
     if (movie && String(movie.submittedBy) !== active.id) {
       throw new ForbiddenError('You do no have the right!')
     }
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    })
-    try {
-      result = await cloudinary.v2.uploader.upload(args.poster, {
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-        public_id: `posters/${movie.title}`,
-        folder: 'tickets',
-      })
-    } catch (e) {
-      return `Image could not be uploaded:${e.message}`
-    }
+    // cloudinary.config({
+    //   cloud_name: process.env.CLOUDINARY_NAME,
+    //   api_key: process.env.CLOUDINARY_API_KEY,
+    //   api_secret: process.env.CLOUDINARY_API_SECRET,
+    // })
+    // try {
+    //   result = await cloudinary.v2.uploader.upload(args.poster, {
+    //     allowed_formats: ['jpg', 'png', 'jpeg'],
+    //     public_id: `posters/${movie.title}`,
+    //     folder: 'tickets',
+    //   })
+    // } catch (e) {
+    //   return `Image could not be uploaded:${e.message}`
+    // }
 
     return await models.Movie.findOneAndUpdate(
       {
@@ -95,7 +80,9 @@ module.exports = {
         $set: {
           title: args.title,
           year: args.year,
-          // poster: result.url,
+          poster: args.poster,
+          synopsis: args.synopsis,
+          rating: args.rating,
         },
       },
       {

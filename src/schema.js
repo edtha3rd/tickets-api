@@ -17,6 +17,7 @@ module.exports = gql`
     phoneNumber: String
     catalogue: [Movie!]!
     myOrders: [Order!]!
+    myReservations: [Reservation!]!
     seats: [[Int]]
     seatsAvailable: Int
     #USER
@@ -30,6 +31,7 @@ module.exports = gql`
     year: String!
     poster: String
     synopsis: String
+    rating: String
     submittedBy: User!
     showingAt: [User!]
     showingAtCount: Int!
@@ -176,9 +178,17 @@ module.exports = gql`
       year: String!
       poster: String
       synopsis: String
+      rating: String
     ): Movie!
     deleteMovie(id: ID): Boolean!
-    editMovie(movieId: ID!, title: String, year: String, poster: String): Movie!
+    editMovie(
+      movieId: ID!
+      title: String
+      year: String
+      poster: String
+      synopsis: String
+      rating: String
+    ): Movie!
   }
   type MovieFeed {
     movies: [Movie]!

@@ -19,7 +19,15 @@ module.exports = {
   myOrders: async (user, args, { models }) => {
     return await models.Order.find({ location: user._id })
   },
+  //a theater has many reservations
+  myReservations: async (user, args, { models }) => {
+    return await models.Reservation.find().populate({
+      path: 'sessionDetails',
+      match: { 'location.id': user.id },
+    })
+  },
+  //a user can make many reservations
   reservationsMade: async (user, args, { models }) => {
-    return await models.Reservations.find({ reservedBy: user._id })
+    return await models.Reservation.find({ reservedBy: user._id })
   },
 }

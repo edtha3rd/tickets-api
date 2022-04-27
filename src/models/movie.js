@@ -5,6 +5,11 @@ const movieSchema = Schema({
   poster: {
     type: String,
   },
+  rating: {
+    type: String,
+    default: 'G',
+    enum: ['G', 'PG', 'PG:13', 'R', 'NC-17'],
+  },
   synopsis: {
     type: String,
   },

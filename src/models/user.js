@@ -49,7 +49,7 @@ const userSchema = new Schema({
   },
   seatsAvailable: {
     type: Number,
-    default: 50,
+    default: 25,
   },
   /*submissions: {
         type: mongoose.Schema.Types.ObjectId,
