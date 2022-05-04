@@ -38,7 +38,7 @@ const orderSchema = Schema(
   {
     timestamps: true,
     index: {
-      expiresAfterSeconds: 3600 * 24 * 7,
+      expireAfterSeconds: 3600 * 24 * 7,
     },
   }
 )

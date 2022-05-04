@@ -57,20 +57,6 @@ module.exports = {
     if (movie && String(movie.submittedBy) !== active.id) {
       throw new ForbiddenError('You do no have the right!')
     }
-    // cloudinary.config({
-    //   cloud_name: process.env.CLOUDINARY_NAME,
-    //   api_key: process.env.CLOUDINARY_API_KEY,
-    //   api_secret: process.env.CLOUDINARY_API_SECRET,
-    // })
-    // try {
-    //   result = await cloudinary.v2.uploader.upload(args.poster, {
-    //     allowed_formats: ['jpg', 'png', 'jpeg'],
-    //     public_id: `posters/${movie.title}`,
-    //     folder: 'tickets',
-    //   })
-    // } catch (e) {
-    //   return `Image could not be uploaded:${e.message}`
-    // }
 
     return await models.Movie.findOneAndUpdate(
       {
@@ -371,7 +357,6 @@ module.exports = {
     }
   },
   updateSession: async (parent, args, { models, user }) => {
-    console.log('updating')
     if (!user) {
       throw new AuthenticationError('You must be logged in')
     }

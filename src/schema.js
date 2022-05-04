@@ -63,22 +63,23 @@ module.exports = gql`
     id: ID!
     location: User!
     movie: Movie!
+    quality: String!
     reservations: Reservation
     screeningDay: Date!
     screeningTime: String!
-    quality: String!
     seatsAvailable: Int
     seatMap: [[String]]
     selectedSeats: [String]
   }
   type Order {
+    createdAt: DateTime
     id: ID!
-    orderedBy: User! #USER
-    toWatch: Movie!
     location: User! #THEATER
+    orderedBy: User! #USER
+    quality: String!
     screeningTime: String!
     screeningDay: Date!
-    quality: String!
+    toWatch: Movie!
   }
   type Query {
     #user queries

@@ -13,7 +13,9 @@ module.exports = {
   },
   //a user has many orders
   ordersMade: async (user, args, { models }) => {
-    return await models.Order.find({ orderedBy: user._id }).sort({ _id: -1 })
+    return await models.Order.find({ orderedBy: user._id }).sort({
+      createdAt: -1,
+    })
   },
   //a theater also has many orders
   myOrders: async (user, args, { models }) => {
