@@ -88,6 +88,7 @@ module.exports = gql`
     users: [User]
     currentUser: User!
     ReviewFeed(rCursor: String): ReviewFeed
+    checkReservation(confirmationCode: String): Reservation
 
     #movie queries
     movie(id: ID!): Movie!

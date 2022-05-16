@@ -67,6 +67,11 @@ module.exports = {
   reservations: async (_, args, { models }) => {
     return await models.Reservation.find()
   },
+  checkReservation: async (_, args, { models }) => {
+    return await models.Reservation.findOne({
+      confirmationCode: args.confirmationCode,
+    })
+  },
 
   //reviews
   ReviewFeed: async (parent, args, { models }) => {
