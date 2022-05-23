@@ -13,7 +13,10 @@ const reservationSchema = Schema(
     },
     confirmationCode: {
       type: String,
-      default: Math.random().toString(16).substring(2, 8),
+      default: Math.random().toString(16).substring(2, 12),
+      index: {
+        unique: true,
+      },
     },
     seat: {
       type: [String],

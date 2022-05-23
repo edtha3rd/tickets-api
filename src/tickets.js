@@ -10,8 +10,6 @@ const jwt = require('jsonwebtoken')
 
 const port = process.env.PORT || 2030
 const DB_URI = process.env.DB_URI
-const sK = process.env.SECRET_KEY
-const pK = process.env.PUBLISHABLE_KEY
 
 const getUser = (token) => {
   if (token) {
