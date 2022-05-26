@@ -24,6 +24,8 @@ module.exports = {
       title: args.title,
       year: args.year,
       poster: args.poster,
+      rating: args.rating,
+      synopsis: args.synopsis,
       submittedBy: mongoose.Types.ObjectId(active.id),
     })
   },
