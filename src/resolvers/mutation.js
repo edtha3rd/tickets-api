@@ -129,7 +129,6 @@ module.exports = {
     email = args.email.trim().toLowerCase()
 
     const hashed = await bcrypt.hash(args.password, 10)
-
     try {
       const user = await models.User.create({
         username: args.username,
@@ -137,7 +136,7 @@ module.exports = {
         fullName: args.fullName,
         address: args.address,
         mobileNumber: args.mobileNumber,
-        role: args.role,
+        role: args.role ? args.role : 'USER',
         password: hashed,
       })
       return jwt.sign({ id: user._id }, process.env.JWT_SECRET)
@@ -288,6 +287,7 @@ module.exports = {
     }
     active = await models.User.findById(user.id)
     return await models.Reservation.create({
+      confirmationCode: Math.random().toString(16).substring(2, 12),
       reservedBy: mongoose.Types.ObjectId(active.id),
       sessionDetails: mongoose.Types.ObjectId(args.sessionId),
       seat: args.seatSelected,
