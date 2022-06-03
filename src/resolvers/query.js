@@ -65,7 +65,7 @@ module.exports = {
   },
   //reservations
   reservations: async (_, args, { models }) => {
-    return await models.Reservation.find()
+    return await models.Reservation.find().sort({ createdAt: -1 })
   },
   checkReservation: async (_, args, { models }) => {
     return await models.Reservation.findOne({
