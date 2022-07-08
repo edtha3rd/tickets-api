@@ -7,7 +7,7 @@ A GraphQL API serving data from a Node.js application.
 - [Technologies](#Technologies)
 - [Concepts](#Concepts)
 - [Setup](#Setup)
-- [Environment Variables](#Environment Variables)
+- [Environment Variables](#Environment-Variables)
 
 ## About
 
