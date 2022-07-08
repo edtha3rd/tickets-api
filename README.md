@@ -3,11 +3,11 @@
 A GraphQL API serving data from a Node.js application.
 
 ## Contents
-[Introduction](#Introduction)
-[Technologies](#Technologies)
-[Concepts](#Concepts)
-[Setup](#Setup)
-[Environment Variables](#Environment Variables)
+- [Introduction](#Introduction)
+- [Technologies](#Technologies)
+- [Concepts](#Concepts)
+- [Setup](#Setup)
+- [Environment Variables](#Environment Variables)
 
 ## About
 
